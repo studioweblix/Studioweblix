@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Immer dunkles Theme – gleiche Darstellung in allen Browsern */
+html, body {
+  background-color: #2C4B44;
+  color: #f5f5f7;
+  color-scheme: dark;
+}
+
+:root {
+  --background: #2C4B44;
+  --foreground: #f5f5f7;
+  --accent: #5a6d6b;
+  --accent-foreground: #ffffff;
+  --accent-yellow: #fbbf24;
+  --muted: #243d38;
+  --muted-foreground: #a1a1aa;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #2C4B44;
+  }
+  body {
+    @apply antialiased;
+    color: #f5f5f7;
+    background-color: #2C4B44;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+
+/* Hero floating & parallax */
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-hero-float {
+  animation: hero-float 4s ease-in-out infinite;
+}
+
+/* Blinkender Cursor für Typing-Effekt */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 0.75s step-end infinite;
+}
