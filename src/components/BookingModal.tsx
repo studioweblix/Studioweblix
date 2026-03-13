@@ -20,7 +20,7 @@ function endZeit(start: string): string {
 
 function formatTerminDatum(d: Date): string {
   const wochentag = WOCHENTAGE_LANG[d.getDay()]
-  return `${d.getDate()}. ${MONATE[d.getMonth()]} ${d.getFullYear()}`
+  return `${wochentag}, ${d.getDate()}. ${MONATE[d.getMonth()]} ${d.getFullYear()}`
 }
 
 function getKalenderTage(year: number, month: number): (Date | null)[] {

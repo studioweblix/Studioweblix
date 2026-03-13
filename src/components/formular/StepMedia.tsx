@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 const ACCEPT_LOGO = '.png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml'
@@ -121,9 +122,12 @@ export function StepMedia({ data, onChange }: Props) {
         />
         {data.logo ? (
           <div className="rounded-xl border border-white/15 bg-[#243d38] p-4 flex items-center gap-4">
-            <img
+            <Image
               src={data.logo.data}
               alt="Logo Vorschau"
+              width={200}
+              height={64}
+              unoptimized
               className="h-16 w-auto max-w-[200px] object-contain rounded bg-white/5"
             />
             <span className="text-white/80 text-sm truncate flex-1">{data.logo.name}</span>
@@ -178,7 +182,14 @@ export function StepMedia({ data, onChange }: Props) {
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
             {data.fotos.map((foto, index) => (
               <div key={index} className="relative group aspect-square rounded-lg overflow-hidden bg-[#243d38] border border-white/10">
-                <img src={foto.data} alt={foto.name} className="w-full h-full object-cover" />
+                <Image
+                  src={foto.data}
+                  alt={foto.name}
+                  width={200}
+                  height={200}
+                  unoptimized
+                  className="w-full h-full object-cover"
+                />
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); onChange({ fotos: data.fotos.filter((_, i) => i !== index) }) }}
