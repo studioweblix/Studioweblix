@@ -46,17 +46,18 @@ async function getSubmission(id: string): Promise<{ data: SubmissionPayload; sub
   return { data: (row.data as SubmissionPayload) ?? {}, submitted_at: row.submitted_at }
 }
 
-function KeyValueList({ entries }: { entries: [string, string][] }) {
+function KeyValueList({ entries }: { entries: [string, string | undefined][] }) {
+  const list = entries
+    .map(([label, value]) => [label, value != null ? String(value) : ''] as [string, string])
+    .filter(([, value]) => value !== '')
   return (
     <dl className="space-y-2">
-      {entries.map(([label, value]) =>
-        value ? (
-          <div key={label} className="flex flex-wrap gap-x-2">
-            <dt className="text-white/60 text-sm shrink-0">{label}</dt>
-            <dd className="text-white text-sm break-words">{value}</dd>
-          </div>
-        ) : null
-      )}
+      {list.map(([label, value]) => (
+        <div key={label} className="flex flex-wrap gap-x-2">
+          <dt className="text-white/60 text-sm shrink-0">{label}</dt>
+          <dd className="text-white text-sm break-words">{value}</dd>
+        </div>
+      ))}
     </dl>
   )
 }
@@ -125,7 +126,7 @@ export default async function FormularAnsichtPage({
               ['Adresse', p.address],
               ['Telefon', p.phone],
               ['E-Mail', p.email],
-            ].map(([k, v]) => [k, String(v ?? '')])}
+            ]}
           />
         </section>
 
@@ -317,7 +318,7 @@ export default async function FormularAnsichtPage({
               entries={[
                 ['Gewünschte Domain', p.domainWish],
                 ['Technische Anmerkungen', p.technicalNotes],
-              ].map(([k, v]) => [k, String(v ?? '')])}
+              ]}
             />
           </section>
         )}
@@ -379,7 +380,7 @@ export default async function FormularAnsichtPage({
               entries={[
                 ['Go-Live Wunsch', p.goLiveTermin],
                 ['Erfahren von', p.erfahrenVon],
-              ].map(([k, v]) => [k, String(v ?? '')])}
+              ]}
             />
           </section>
         )}
