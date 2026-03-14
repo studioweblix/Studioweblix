@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { submitFormData } from '@/app/formular/actions'
+import { submitForm } from '@/app/formular/actions'
 
 const STEPS = [
   'Unternehmensdaten',
@@ -110,7 +109,7 @@ export function FormularPageClient() {
       logo,
       fotos,
     }
-    const result = await submitFormData(payload)
+    const result = await submitForm(payload)
     setSubmitting(false)
     if (result.success) setSubmitted(true)
     else setError(result.error ?? 'Speichern fehlgeschlagen.')
@@ -131,17 +130,44 @@ export function FormularPageClient() {
     exit: (d: number) => ({ x: d > 0 ? -24 : 24, opacity: 0 }),
   }
 
+  const STUDIO_EMAIL = 'studioweblix@gmail.com'
+  const STUDIO_PHONE = '017645865595'
+  const ansprechpartner = companyName?.trim() || 'Ihre Angaben'
+
   if (submitted) {
     return (
-      <div className="flex-1 flex items-center justify-center px-4 py-16">
-        <div className="text-center max-w-md">
-          <h1 className="text-xl md:text-2xl font-bold text-[#2C4B44] mb-3">Vielen Dank</h1>
-          <p className="text-gray-600 mb-8">
-            Ihr Formular wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.
+      <div className="flex-1 flex items-center justify-center px-4 py-20 min-h-[70vh]">
+        <div className="text-center max-w-lg mx-auto space-y-10">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 14 }}
+            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#4A7C6B] text-white"
+            aria-hidden
+          >
+            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+          </motion.div>
+          <div className="space-y-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#2C4B44]">
+              Vielen Dank, {ansprechpartner}!
+            </h1>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Wir haben Ihre Angaben erhalten und melden uns innerhalb von 24 Stunden bei Ihnen.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-[#2C4B44] font-medium">
+            <a href={`mailto:${STUDIO_EMAIL}`} className="hover:underline focus:outline-none focus:ring-2 focus:ring-[#4A7C6B] rounded">
+              {STUDIO_EMAIL}
+            </a>
+            <a href={`tel:${STUDIO_PHONE.replace(/\s/g, '')}`} className="hover:underline focus:outline-none focus:ring-2 focus:ring-[#4A7C6B] rounded">
+              {STUDIO_PHONE}
+            </a>
+          </div>
+          <p className="text-gray-500 text-sm">
+            Sie können dieses Fenster jetzt schließen.
           </p>
-          <Link href="/" className="inline-block px-6 py-3 rounded-lg bg-[#4A7C6B] text-white font-medium hover:bg-[#3d6b5c] transition-colors">
-            Zur Startseite
-          </Link>
         </div>
       </div>
     )
