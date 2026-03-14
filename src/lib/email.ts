@@ -91,7 +91,7 @@ export async function sendFormNotification(params: FormNotificationParams): Prom
 
   try {
     const resend = new Resend(apiKey)
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to: [to],
       subject,
