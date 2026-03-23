@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import { StudioWeblixLogo } from './StudioWeblixLogo'
-import { BookingModal } from './BookingModal'
 import type { Settings } from '@/lib/types'
 
 interface HeaderProps {
@@ -16,12 +15,11 @@ const navLinks = [
   { href: '/preis', label: 'Preis' },
   { href: '/ueber-uns', label: 'Über uns' },
   { href: '/produkte', label: 'Unsere Designs' },
-  { href: '/kontakt', label: 'Call Buchen', openBooking: true },
+  { href: '/formular', label: 'Call Buchen' },
 ]
 
 export function Header({ settings }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [bookingOpen, setBookingOpen] = useState(false)
   const storeName = settings?.store_name ?? 'Studio Weblix'
 
   return (
@@ -49,26 +47,15 @@ export function Header({ settings }: HeaderProps) {
 
       <div className="flex items-center gap-6 xl:gap-8">
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-          {navLinks.map((link) =>
-            (link as { openBooking?: boolean }).openBooking ? (
-              <button
-                key={link.label}
-                type="button"
-                onClick={() => setBookingOpen(true)}
-                className="text-white hover:text-white/80 transition-colors text-sm font-medium whitespace-nowrap"
-              >
-                {link.label}
-              </button>
-            ) : (
-              <Link
-                key={`${link.href}-${link.label}`}
-                href={link.href}
-                className="text-white hover:text-white/80 transition-colors text-sm font-medium whitespace-nowrap"
-              >
-                {link.label}
-              </Link>
-            )
-          )}
+          {navLinks.map((link) => (
+            <Link
+              key={`${link.href}-${link.label}`}
+              href={link.href}
+              className="text-white hover:text-white/80 transition-colors text-sm font-medium whitespace-nowrap"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
         <button
@@ -105,31 +92,19 @@ export function Header({ settings }: HeaderProps) {
       {mobileOpen && (
           <nav className="lg:hidden py-4 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#2C4B44]/95 backdrop-blur-sm animate-fade-in">
             <div className="flex flex-col gap-3">
-              {navLinks.map((link) =>
-                (link as { openBooking?: boolean }).openBooking ? (
-                  <button
-                    key={link.label}
-                    type="button"
-                    onClick={() => { setBookingOpen(true); setMobileOpen(false); }}
-                    className="text-white hover:text-white/80 transition-colors py-2 block text-left"
-                  >
-                    {link.label}
-                  </button>
-                ) : (
-                  <Link
-                    key={`${link.href}-${link.label}`}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-white hover:text-white/80 transition-colors py-2 block"
-                  >
-                    {link.label}
-                  </Link>
-                )
-              )}
+              {navLinks.map((link) => (
+                <Link
+                  key={`${link.href}-${link.label}`}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="text-white hover:text-white/80 transition-colors py-2 block"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </nav>
         )}
-      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
     </header>
   )
 }

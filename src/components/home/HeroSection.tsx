@@ -1,7 +1,7 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { BookingModal } from '@/components/BookingModal'
 import { LaptopDrawn } from '@/components/home/LaptopDrawn'
 import { TypingEffect } from '@/components/home/TypingEffect'
 import type { PageContent, Settings } from '@/lib/types'
@@ -14,7 +14,6 @@ interface HeroSectionProps {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function HeroSection({ pageContent, settings }: HeroSectionProps) {
   const [scrollY, setScrollY] = useState(0)
-  const [bookingOpen, setBookingOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
@@ -125,16 +124,14 @@ export function HeroSection({ pageContent, settings }: HeroSectionProps) {
           <p className="text-lg sm:text-xl text-white/90 max-w-xl mb-8 animate-fade-in animate-delay-100 leading-relaxed">
             {heroSubtitle}
           </p>
-          <button
-            type="button"
-            onClick={() => setBookingOpen(true)}
+          <Link
+            href="/formular"
             className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-white/15 backdrop-blur-md border border-white/25 text-white font-semibold hover:bg-white/25 transition-all hover:scale-[1.02] shadow-lg animate-fade-in animate-delay-200 uppercase tracking-wide"
           >
             Call buchen
-          </button>
+          </Link>
         </div>
       </div>
-      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
     </section>
   )
 }

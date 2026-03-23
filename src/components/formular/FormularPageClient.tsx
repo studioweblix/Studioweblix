@@ -5,15 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { submitForm } from '@/app/formular/actions'
 
 const STEPS = [
+  'Datum & Uhrzeit wählen',
   'Unternehmensdaten',
-  'Paket-Auswahl',
   'Design & Stil',
-  'Seiten/Sections',
   'Texte & Medien',
   'Öffnungszeiten',
   'Social Media',
-  'Domain & Technisches',
-  'E-Commerce',
   'Wünsche & Absenden',
 ]
 
@@ -21,7 +18,62 @@ const inputClass =
   'w-full px-4 py-3 rounded-lg bg-[#243d38] border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#5a6d6b]'
 const labelClass = 'block text-sm font-medium text-white/80 mb-2'
 
-export function FormularPageClient() {
+const WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'] as const
+const WEEKDAY_SHORT = ['MO.', 'DI.', 'MI.', 'DO.', 'FR.', 'SA.', 'SO.'] as const
+const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+
+function getCalendarDays(year: number, month: number): (number | null)[] {
+  const first = new Date(year, month, 1)
+  const last = new Date(year, month + 1, 0)
+  const daysInMonth = last.getDate()
+  const startWeekday = (first.getDay() + 6) % 7
+  const result: (number | null)[] = []
+  for (let i = 0; i < startWeekday; i++) result.push(null)
+  for (let d = 1; d <= daysInMonth; d++) result.push(d)
+  return result
+}
+
+function toISODate(year: number, month: number, day: number): string {
+  const y = year.toString()
+  const m = (month + 1).toString().padStart(2, '0')
+  const d = day.toString().padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+const TIME_OPTIONS: string[] = []
+for (let h = 6; h <= 23; h++) {
+  for (const m of ['00', '30']) {
+    TIME_OPTIONS.push(`${h.toString().padStart(2, '0')}:${m}`)
+  }
+}
+
+// Uhrzeit-Optionen für Terminauswahl: 9:00 bis 17:00 in 30-Min-Schritten
+const SLOT_TIME_OPTIONS: string[] = []
+for (let h = 9; h <= 17; h++) {
+  for (const m of ['00', '30']) {
+    if (h === 17 && m === '30') break
+    SLOT_TIME_OPTIONS.push(`${h.toString().padStart(2, '0')}:${m}`)
+  }
+}
+
+type OpeningHoursTime = { open: string; close: string }
+type OpeningHoursDay = { day: string; closed: boolean; times: OpeningHoursTime[] }
+
+function defaultOpeningHours(): OpeningHoursDay[] {
+  return WEEKDAYS.map((day) => ({
+    day,
+    closed: false,
+    times: [{ open: '09:00', close: '18:00' }],
+  }))
+}
+
+type BookedSlot = { date: string; time: string }
+
+interface FormularPageClientProps {
+  initialBookedSlots?: BookedSlot[]
+}
+
+export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClientProps) {
   const [step, setStep] = useState(1)
   const [direction, setDirection] = useState(0) // 1 = forward, -1 = back
   const [submitting, setSubmitting] = useState(false)
@@ -34,42 +86,36 @@ export function FormularPageClient() {
   const [address, setAddress] = useState('')
   const [phone, setPhone] = useState('')
 
-  // Schritt 2: Paket
-  const [selectedPackage, setSelectedPackage] = useState('')
-
-  // Schritt 3: Design
+  // Schritt 2: Design
   const [designStyle, setDesignStyle] = useState('')
   const [colorWish, setColorWish] = useState('')
 
-  // Schritt 4: Seiten
-  const [desiredPages, setDesiredPages] = useState('')
-
-  // Schritt 5: Texte & Medien
+  // Schritt 3: Texte & Medien
   const [mainText, setMainText] = useState('')
   const [imageFiles, setImageFiles] = useState<File[]>([])
 
-  // Schritt 6: Öffnungszeiten
-  const [openingHours, setOpeningHours] = useState('')
+  // Schritt 4: Öffnungszeiten (pro Tag: closed, times[])
+  const [openingHoursData, setOpeningHoursData] = useState<OpeningHoursDay[]>(defaultOpeningHours())
 
-  // Schritt 7: Social Media
+  // Schritt 5: Social Media
   const [socialFacebook, setSocialFacebook] = useState('')
   const [socialInstagram, setSocialInstagram] = useState('')
   const [socialLinkedin, setSocialLinkedin] = useState('')
 
-  // Schritt 8: Domain
-  const [domainWish, setDomainWish] = useState('')
-  const [technicalNotes, setTechnicalNotes] = useState('')
+  // Schritt 1: Datum & Uhrzeit (Slots = Datum + Uhrzeit pro Klick)
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const d = new Date()
+    return { year: d.getFullYear(), month: d.getMonth() }
+  })
+  const [selectedSlots, setSelectedSlots] = useState<{ date: string; time: string }[]>([])
+  const [pendingDate, setPendingDate] = useState<string | null>(null)
 
-  // Schritt 9: E-Commerce
-  const [needEcommerce, setNeedEcommerce] = useState(false)
-  const [ecommerceNotes, setEcommerceNotes] = useState('')
-
-  // Schritt 10: Wünsche
+  // Schritt 7: Wünsche
   const [specialWishes, setSpecialWishes] = useState('')
 
   function goNext() {
     setDirection(1)
-    setStep((s) => Math.min(s + 1, 10))
+    setStep((s) => Math.min(s + 1, 7))
   }
   function goBack() {
     setDirection(-1)
@@ -92,19 +138,14 @@ export function FormularPageClient() {
       companyType,
       address,
       phone,
-      selectedPackage,
       designStyle,
       colorWish,
-      desiredPages,
       mainText,
-      openingHours,
+      openingHours: openingHoursData,
       socialFacebook,
       socialInstagram,
       socialLinkedin,
-      domainWish,
-      technicalNotes,
-      needEcommerce,
-      ecommerceNotes,
+      preferredSlots: selectedSlots,
       specialWishes,
       logo,
       fotos,
@@ -199,10 +240,10 @@ export function FormularPageClient() {
                 />
               ))}
             </div>
-            <p className="text-white/80 text-sm text-center mt-3">Schritt {step} von 10 · {STEPS[step - 1]}</p>
+            <p className="text-white/80 text-sm text-center mt-3">Schritt {step} von 7 · {STEPS[step - 1]}</p>
           </div>
 
-          <form onSubmit={step === 10 ? handleSubmit : (e) => { e.preventDefault(); goNext(); }} className="relative overflow-hidden min-h-[320px]">
+          <form onSubmit={step === 7 ? handleSubmit : (e) => { e.preventDefault(); goNext(); }} className="relative overflow-hidden min-h-[320px]">
             <AnimatePresence mode="wait" custom={direction} initial={false}>
               <motion.div
                 key={step}
@@ -214,8 +255,166 @@ export function FormularPageClient() {
                 transition={{ duration: 0.25, ease: 'easeInOut' }}
                 className="space-y-6"
               >
-                {/* Schritt 1: Unternehmensdaten */}
+                {/* Schritt 1: Datum & Uhrzeit wählen */}
                 {step === 1 && (
+                  <>
+                    <h2 className="text-lg font-semibold text-white">Datum & Uhrzeit wählen</h2>
+                    <div className="rounded-xl bg-[#243d38] border border-white/10 p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-white">
+                          {MONTH_NAMES[calendarMonth.month]} {calendarMonth.year}
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCalendarMonth((prev) =>
+                                prev.month === 0
+                                  ? { year: prev.year - 1, month: 11 }
+                                  : { year: prev.year, month: prev.month - 1 }
+                              )
+                            }
+                            className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+                            aria-label="Vorheriger Monat"
+                          >
+                            <span className="sr-only">Vorheriger Monat</span>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCalendarMonth((prev) =>
+                                prev.month === 11
+                                  ? { year: prev.year + 1, month: 0 }
+                                  : { year: prev.year, month: prev.month + 1 }
+                              )
+                            }
+                            className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+                            aria-label="Nächster Monat"
+                          >
+                            <span className="sr-only">Nächster Monat</span>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1 text-center">
+                        {WEEKDAY_SHORT.map((wd) => (
+                          <span key={wd} className="text-white/60 text-xs font-medium py-1">
+                            {wd}
+                          </span>
+                        ))}
+                        {getCalendarDays(calendarMonth.year, calendarMonth.month).map((day, i) => {
+                          const iso = day === null ? '' : toISODate(calendarMonth.year, calendarMonth.month, day)
+                          const isSelected = iso && selectedSlots.some((s) => s.date === iso)
+                          const isPending = iso && pendingDate === iso
+                          const isMarked = isSelected || isPending
+                          return day === null ? (
+                            <span key={`e-${i}`} className="py-2" />
+                          ) : (
+                            <button
+                              key={day}
+                              type="button"
+                              onClick={() => setPendingDate(iso)}
+                              className={`py-2 rounded-full text-sm font-medium transition-colors ${
+                                isMarked
+                                  ? 'bg-[#1e4a3e] text-white ring-2 ring-[#2d6b5a] ring-inset'
+                                  : 'text-white/80 hover:bg-white/10'
+                              }`}
+                            >
+                              {day}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    {pendingDate && (
+                      <div className="rounded-xl bg-[#243d38] border border-white/10 p-4 space-y-3">
+                        <p className="text-sm font-medium text-white">
+                          Uhrzeit für {new Date(pendingDate + 'T12:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })} wählen
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {SLOT_TIME_OPTIONS.map((t) => {
+                            const isBooked = initialBookedSlots.some((s) => s.date === pendingDate && s.time === t)
+                            return (
+                              <button
+                                key={t}
+                                type="button"
+                                disabled={isBooked}
+                                title={isBooked ? 'Dieser Termin ist bereits gebucht' : undefined}
+                                onClick={() => {
+                                  if (isBooked) return
+                                  const existing = selectedSlots.findIndex((s) => s.date === pendingDate)
+                                  const newSlots =
+                                    existing >= 0
+                                      ? selectedSlots.map((s) => (s.date === pendingDate ? { date: pendingDate, time: t } : s))
+                                      : [...selectedSlots, { date: pendingDate, time: t }].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
+                                  setSelectedSlots(newSlots)
+                                  setPendingDate(null)
+                                }}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  isBooked
+                                    ? 'bg-white/5 text-white/40 cursor-not-allowed line-through'
+                                    : 'bg-white/10 text-white hover:bg-[#5a9fd4]'
+                                }`}
+                              >
+                                {t}{isBooked ? ' (belegt)' : ''}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        {selectedSlots.some((s) => s.date === pendingDate) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedSlots((prev) => prev.filter((s) => s.date !== pendingDate))
+                              setPendingDate(null)
+                            }}
+                            className="text-sm text-white/70 hover:text-white underline"
+                          >
+                            Termin entfernen
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setPendingDate(null)}
+                          className="text-sm text-white/60 hover:text-white/80"
+                        >
+                          Abbrechen
+                        </button>
+                      </div>
+                    )}
+                    {selectedSlots.length > 0 && !pendingDate && (
+                      <div className="space-y-2">
+                        <p className="text-white/90 text-sm font-medium">Ihre gewählten Termine</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedSlots.map((s) => (
+                            <div
+                              key={`${s.date}-${s.time}`}
+                              className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1e4a3e] border border-[#2d6b5a] text-white"
+                            >
+                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#2d6b5a] text-white" aria-hidden>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </span>
+                              <span className="font-medium">
+                                {new Date(s.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long', year: 'numeric' })}
+                              </span>
+                              <span className="text-white/90 font-semibold tabular-nums">{s.time} Uhr</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Schritt 2: Unternehmensdaten */}
+                {step === 2 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Unternehmensdaten</h2>
                     <div>
@@ -237,22 +436,6 @@ export function FormularPageClient() {
                   </>
                 )}
 
-                {/* Schritt 2: Paket-Auswahl */}
-                {step === 2 && (
-                  <>
-                    <h2 className="text-lg font-semibold text-white">Paket-Auswahl</h2>
-                    <p className="text-white/70 text-sm">Wählen Sie das passende Angebot.</p>
-                    <div className="space-y-3">
-                      {['Monatlich (99€/Monat)', 'Einmalzahlung (899€)', 'E-Commerce Store (250€/Monat)'].map((pkg) => (
-                        <label key={pkg} className="flex items-center gap-3 p-4 rounded-lg bg-[#243d38] border border-white/10 cursor-pointer hover:border-[#5a6d6b]/50">
-                          <input type="radio" name="package" value={pkg} checked={selectedPackage === pkg} onChange={() => setSelectedPackage(pkg)} className="text-[#5a6d6b]" />
-                          <span className="text-white">{pkg}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </>
-                )}
-
                 {/* Schritt 3: Design & Stil */}
                 {step === 3 && (
                   <>
@@ -268,19 +451,8 @@ export function FormularPageClient() {
                   </>
                 )}
 
-                {/* Schritt 4: Gewünschte Seiten/Sections */}
+                {/* Schritt 4: Texte & Medien (mit Bild-Upload) */}
                 {step === 4 && (
-                  <>
-                    <h2 className="text-lg font-semibold text-white">Gewünschte Seiten / Sections</h2>
-                    <div>
-                      <label htmlFor="desiredPages" className={labelClass}>Welche Seiten oder Bereiche sollen auf die Website?</label>
-                      <textarea id="desiredPages" value={desiredPages} onChange={(e) => setDesiredPages(e.target.value)} rows={5} className={inputClass + ' resize-y'} placeholder="z. B. Start, Leistungen, Über uns, Galerie, Kontakt …" />
-                    </div>
-                  </>
-                )}
-
-                {/* Schritt 5: Texte & Medien (mit Bild-Upload) */}
-                {step === 5 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Texte & Medien</h2>
                     <div>
@@ -301,19 +473,117 @@ export function FormularPageClient() {
                   </>
                 )}
 
-                {/* Schritt 6: Öffnungszeiten */}
-                {step === 6 && (
+                {/* Schritt 5: Öffnungszeiten */}
+                {step === 5 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Öffnungszeiten</h2>
-                    <div>
-                      <label htmlFor="openingHours" className={labelClass}>Öffnungszeiten</label>
-                      <textarea id="openingHours" value={openingHours} onChange={(e) => setOpeningHours(e.target.value)} rows={5} className={inputClass + ' resize-y'} placeholder="z. B. Mo–Fr 8–18 Uhr, Sa 9–13 Uhr" />
+                    <p className="text-white/70 text-sm mb-4">Pro Tag angeben, wann geöffnet ist. Bei „Geschlossen“ die Zeiten ignorieren.</p>
+                    <div className="space-y-4">
+                      {openingHoursData.map((row, dayIndex) => (
+                        <div
+                          key={row.day}
+                          className="rounded-xl bg-[#243d38] border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-wrap"
+                        >
+                          <div className="w-full sm:w-24 shrink-0">
+                            <span className="font-bold text-white">{row.day}</span>
+                          </div>
+                          <label className="flex items-center gap-2 shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={row.closed}
+                              onChange={() => {
+                                setOpeningHoursData((prev) =>
+                                  prev.map((r, i) =>
+                                    i === dayIndex ? { ...r, closed: !r.closed } : r
+                                  )
+                                )
+                              }}
+                              className="rounded text-[#5a6d6b]"
+                            />
+                            <span className="text-white/90 text-sm">Geschlossen</span>
+                          </label>
+                          <div className="flex-1 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
+                            {row.times.map((slot, slotIndex) => (
+                              <div
+                                key={slotIndex}
+                                className="flex flex-wrap items-center gap-2"
+                              >
+                                <select
+                                  value={slot.open}
+                                  disabled={row.closed}
+                                  onChange={(e) => {
+                                    setOpeningHoursData((prev) =>
+                                      prev.map((r, i) => {
+                                        if (i !== dayIndex) return r
+                                        const newTimes = r.times.map((t, j) =>
+                                          j === slotIndex ? { ...t, open: e.target.value } : t
+                                        )
+                                        return { ...r, times: newTimes }
+                                      })
+                                    )
+                                  }}
+                                  className={`px-3 py-2 rounded-lg bg-[#243d38] border border-white/10 text-white text-sm focus:ring-2 focus:ring-[#5a6d6b] ${row.closed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                  {TIME_OPTIONS.map((t) => (
+                                    <option key={t} value={t} className="bg-[#243d38]">
+                                      {t}
+                                    </option>
+                                  ))}
+                                </select>
+                                <span className="text-white/60 text-sm">bis</span>
+                                <select
+                                  value={slot.close}
+                                  disabled={row.closed}
+                                  onChange={(e) => {
+                                    setOpeningHoursData((prev) =>
+                                      prev.map((r, i) => {
+                                        if (i !== dayIndex) return r
+                                        const newTimes = r.times.map((t, j) =>
+                                          j === slotIndex ? { ...t, close: e.target.value } : t
+                                        )
+                                        return { ...r, times: newTimes }
+                                      })
+                                    )
+                                  }}
+                                  className={`px-3 py-2 rounded-lg bg-[#243d38] border border-white/10 text-white text-sm focus:ring-2 focus:ring-[#5a6d6b] ${row.closed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                  {TIME_OPTIONS.map((t) => (
+                                    <option key={t} value={t} className="bg-[#243d38]">
+                                      {t}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpeningHoursData((prev) =>
+                                  prev.map((r, i) => {
+                                    if (i !== dayIndex) return r
+                                    return {
+                                      ...r,
+                                      times: [...r.times, { open: '09:00', close: '18:00' }],
+                                    }
+                                  })
+                                )
+                              }}
+                              disabled={row.closed}
+                              className="shrink-0 w-8 h-8 rounded-lg bg-[#4A7C6B] text-white flex items-center justify-center text-lg font-bold hover:bg-[#3d6b5c] disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Weitere Zeitspanne (z. B. Mittagspause)"
+                              aria-label="Weitere Zeitspanne hinzufügen"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </>
                 )}
 
-                {/* Schritt 7: Social Media */}
-                {step === 7 && (
+                {/* Schritt 6: Social Media */}
+                {step === 6 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Social Media</h2>
                     <p className="text-white/70 text-sm">Links zu Ihren Profilen (optional)</p>
@@ -332,41 +602,8 @@ export function FormularPageClient() {
                   </>
                 )}
 
-                {/* Schritt 8: Domain & Technisches */}
-                {step === 8 && (
-                  <>
-                    <h2 className="text-lg font-semibold text-white">Domain & Technisches</h2>
-                    <div>
-                      <label htmlFor="domainWish" className={labelClass}>Gewünschte Domain</label>
-                      <input id="domainWish" type="text" value={domainWish} onChange={(e) => setDomainWish(e.target.value)} className={inputClass} placeholder="z. B. meine-firma.de" />
-                    </div>
-                    <div>
-                      <label htmlFor="technicalNotes" className={labelClass}>Technische Wünsche / Anmerkungen</label>
-                      <textarea id="technicalNotes" value={technicalNotes} onChange={(e) => setTechnicalNotes(e.target.value)} rows={3} className={inputClass + ' resize-y'} placeholder="z. B. Newsletter, Formulare, Anbindungen …" />
-                    </div>
-                  </>
-                )}
-
-                {/* Schritt 9: E-Commerce (optional) */}
-                {step === 9 && (
-                  <>
-                    <h2 className="text-lg font-semibold text-white">E-Commerce</h2>
-                    <p className="text-white/70 text-sm">Benötigen Sie einen Online-Shop? Dieser Schritt kann übersprungen werden.</p>
-                    <label className="flex items-center gap-3 p-4 rounded-lg bg-[#243d38] border border-white/10 cursor-pointer mb-4">
-                      <input type="checkbox" checked={needEcommerce} onChange={(e) => setNeedEcommerce(e.target.checked)} className="rounded text-[#5a6d6b]" />
-                      <span className="text-white">Ja, ich brauche einen E-Commerce / Online-Shop</span>
-                    </label>
-                    {needEcommerce && (
-                      <div>
-                        <label htmlFor="ecommerceNotes" className={labelClass}>Anmerkungen zum Shop</label>
-                        <textarea id="ecommerceNotes" value={ecommerceNotes} onChange={(e) => setEcommerceNotes(e.target.value)} rows={3} className={inputClass + ' resize-y'} placeholder="Produktanzahl, Zahlungsanbieter, etc." />
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Schritt 10: Besondere Wünsche & Absenden */}
-                {step === 10 && (
+                {/* Schritt 7: Besondere Wünsche & Absenden */}
+                {step === 7 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Besondere Wünsche & Absenden</h2>
                     <div>
@@ -376,7 +613,6 @@ export function FormularPageClient() {
                     <div className="rounded-xl bg-[#243d38] border border-white/10 p-4 text-white/80 text-sm space-y-1">
                       {companyName && <p><strong className="text-white">Unternehmen:</strong> {companyName}</p>}
                       {phone && <p><strong className="text-white">Telefon:</strong> {phone}</p>}
-                      {selectedPackage && <p><strong className="text-white">Paket:</strong> {selectedPackage}</p>}
                     </div>
                     {error && <p className="text-red-400 text-sm">{error}</p>}
                   </>
@@ -390,7 +626,7 @@ export function FormularPageClient() {
                   Zurück
                 </button>
               )}
-              {step === 9 && (
+              {step === 6 && (
                 <button type="button" onClick={goNext} className="px-6 py-3 rounded-lg bg-white/15 text-white font-medium hover:bg-white/25 transition-colors">
                   Überspringen
                 </button>
@@ -400,7 +636,7 @@ export function FormularPageClient() {
                 disabled={submitting}
                 className="px-6 py-3 rounded-lg bg-[#5a6d6b] text-white font-medium hover:bg-[#4A5D5B] transition-colors disabled:opacity-50 ml-auto"
               >
-                {step < 10 ? 'Weiter' : submitting ? 'Wird gesendet …' : 'Absenden'}
+                {step < 7 ? 'Weiter' : submitting ? 'Wird gesendet …' : 'Absenden'}
               </button>
             </div>
           </form>

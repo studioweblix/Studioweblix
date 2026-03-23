@@ -121,18 +121,6 @@ function BookingDetailsForm({ selectedDate, selectedTime, onClose }: BookingDeta
               />
             </div>
           </div>
-          <div>
-            <label htmlFor="booking-wish" className="block text-white/90 text-sm font-medium mb-1.5">
-              Einblick in Ihr Unternehmen für eine Demo-Website
-            </label>
-            <textarea
-              id="booking-wish"
-              name="nachricht"
-              rows={4}
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a6d6b] focus:border-transparent resize-none"
-              placeholder="Erzählen Sie uns kurz von Ihrem Projekt …"
-            />
-          </div>
           <p className="text-white/60 text-xs leading-relaxed">
             Indem Sie fortfahren, bestätigen Sie, dass Sie die{' '}
             <Link href="/datenschutz" onClick={onClose} className="text-[#5a6d6b] hover:text-white underline">

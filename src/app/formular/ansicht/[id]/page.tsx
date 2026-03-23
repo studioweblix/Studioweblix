@@ -19,7 +19,7 @@ type SubmissionPayload = {
   logoUrl?: string
   photoUrls?: string[]
   fotoUrls?: string[]
-  openingHours?: string
+  openingHours?: string | { day: string; closed: boolean; times: { open: string; close: string }[] }[]
   socialFacebook?: string
   socialInstagram?: string
   socialLinkedin?: string
@@ -245,22 +245,46 @@ export default async function FormularAnsichtPage({
         )}
 
         {/* Öffnungszeiten */}
-        {p.openingHours && (
+        {(p.openingHours != null && (Array.isArray(p.openingHours) ? p.openingHours.length > 0 : String(p.openingHours).trim() !== '')) && (
           <section className="rounded-xl bg-[#243d38] border border-white/10 p-6">
             <h2 className="text-base font-semibold text-white mb-3">Öffnungszeiten</h2>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-white/90">
-                <tbody>
-                  {p.openingHours
-                    .split(/\n/)
-                    .filter((line) => line.trim())
-                    .map((line, i) => (
+              {Array.isArray(p.openingHours) ? (
+                <table className="w-full text-sm text-white/90">
+                  <tbody>
+                    {p.openingHours.map((row, i) => (
                       <tr key={i} className="border-b border-white/10 last:border-0">
-                        <td className="py-2 pr-4 whitespace-pre-wrap">{line.trim()}</td>
+                        <td className="py-2 pr-4 font-medium text-white/90 w-28">{row.day}</td>
+                        <td className="py-2">
+                          {row.closed ? (
+                            <span className="text-white/60">Geschlossen</span>
+                          ) : (
+                            row.times.map((slot, j) => (
+                              <span key={j}>
+                                {slot.open} – {slot.close}
+                                {j < row.times.length - 1 ? ', ' : ''}
+                              </span>
+                            ))
+                          )}
+                        </td>
                       </tr>
                     ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              ) : (
+                <table className="w-full text-sm text-white/90">
+                  <tbody>
+                    {String(p.openingHours)
+                      .split(/\n/)
+                      .filter((line) => line.trim())
+                      .map((line, i) => (
+                        <tr key={i} className="border-b border-white/10 last:border-0">
+                          <td className="py-2 pr-4 whitespace-pre-wrap">{line.trim()}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
         )}

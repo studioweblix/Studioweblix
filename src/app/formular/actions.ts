@@ -118,6 +118,28 @@ export async function submitForm(
   return { success: true, id: submissionId }
 }
 
+export type BookedSlot = { date: string; time: string }
+
+/** Liefert alle bereits gebuchten Termine (Datum + Uhrzeit) aus allen Formular-Einreichungen. */
+export async function getBookedSlots(): Promise<BookedSlot[]> {
+  const supabase = createAdminClient()
+  const { data: rows, error } = await supabase
+    .from('form_submissions')
+    .select('data')
+  if (error) return []
+  const slots: BookedSlot[] = []
+  for (const row of rows ?? []) {
+    const d = row?.data as Record<string, unknown> | null
+    const preferred = d?.preferredSlots as Array<{ date?: string; time?: string }> | null | undefined
+    if (Array.isArray(preferred)) {
+      for (const s of preferred) {
+        if (s?.date && s?.time) slots.push({ date: String(s.date), time: String(s.time) })
+      }
+    }
+  }
+  return slots
+}
+
 export async function submitFormData(
   payload: Record<string, unknown>
 ): Promise<{ success: true } | { success: false; error: string }> {
