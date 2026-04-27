@@ -10,16 +10,15 @@ const monatsVorteile = [
   'Wartung & Updates inklusive',
   'Persönliches Dashboard',
   'Änderungen jederzeit inklusive',
-  'Monatlich kündbar',
   'Sofort startklar',
 ]
 
-const einmalzahlungVorteile = [
-  'Professionelles Webdesign',
+const websiteReservierungVorteile = [
+  'Professionelle Website inklusive',
+  'Tisch-Management-System',
   'Eigene Domain',
   'Hosting inklusive',
   'Persönliches Dashboard',
-  '29 €/Monat laufende Kosten',
 ]
 
 function CheckIcon() {
@@ -50,15 +49,14 @@ export default function PreisPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-10 items-stretch">
-          {/* Monatliches Paket */}
+          {/* Restaurant-Website */}
           <div className="relative rounded-2xl bg-[#243d38] border border-white/10 overflow-hidden transition-all hover:border-[#5a6d6b]/30 hover:shadow-lg hover:shadow-[#5a6d6b]/5 flex flex-col">
             <div className="p-8 flex flex-col flex-1 min-h-0">
-              <h3 className="text-xl font-semibold text-white mb-6">Monatliches Paket</h3>
+              <h3 className="text-xl font-semibold text-white mb-6">Restaurant-Website</h3>
               <div className="mb-6">
                 <span className="text-4xl md:text-5xl font-bold text-white">99€</span>
                 <span className="text-xl md:text-2xl font-normal text-white/60">/Monat</span>
-                <p className="text-white/50 text-sm mt-1">Flexibel kündbar</p>
-                <p className="text-white/50 text-sm mt-0.5">Ihre Landing page</p>
+                <p className="text-white/50 text-sm mt-1">Ihre Landing page</p>
               </div>
               <div className="flex-1 min-h-0 flex flex-col">
                 <ul className="space-y-3 flex-1">
@@ -78,18 +76,18 @@ export default function PreisPage() {
             </div>
           </div>
 
-          {/* Einmalzahlung */}
+          {/* Website + Reservierungssoftware */}
           <div className="relative rounded-2xl bg-[#243d38] border border-[#5a6d6b]/30 overflow-hidden transition-all hover:border-[#5a6d6b]/50 hover:shadow-lg hover:shadow-[#5a6d6b]/10 flex flex-col">
             <div className="p-8 flex flex-col flex-1 min-h-0">
-              <h3 className="text-xl font-semibold text-white mb-6">Einmalzahlung</h3>
+              <h3 className="text-xl font-semibold text-white mb-6">Website + Reservierungssoftware</h3>
               <div className="mb-6">
-                <span className="text-4xl md:text-5xl font-bold text-white">899€</span>
+                <span className="text-4xl md:text-5xl font-bold text-white">129€</span>
                 <span className="block text-white/60 text-sm mt-0.5">einmalig</span>
-                <p className="text-white/50 text-sm mt-1">Ihre Landing page</p>
+                <p className="text-white/50 text-sm mt-1">Website mit Reservierung & Tischmanagement</p>
               </div>
               <div className="flex-1 min-h-0 flex flex-col">
                 <ul className="space-y-3 flex-1">
-                  {einmalzahlungVorteile.map((v) => (
+                  {websiteReservierungVorteile.map((v) => (
                     <li key={v} className="flex items-center gap-3 text-white/80 text-sm">
                       <CheckIcon />
                       {v}
@@ -100,55 +98,6 @@ export default function PreisPage() {
                   productId="once"
                   className="block w-full py-4 text-center mt-6 shrink-0"
                   fullWidth
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* E-COM STORE: Breite Box unter den anderen Angeboten */}
-        <div className="mt-8 md:mt-10">
-          <div className="relative rounded-2xl bg-[#243d38] border border-white/10 overflow-hidden transition-all hover:border-[#5a6d6b]/30 hover:shadow-lg hover:shadow-[#5a6d6b]/5">
-            <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="flex-1">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
-                  E-COM STORE
-                </h3>
-                <p className="text-white/60 text-sm">
-                  Professioneller Online-Shop für Ihr E-Commerce-Geschäft
-                </p>
-              </div>
-              <div className="flex items-center gap-6">
-                <div>
-                  <p className="text-3xl md:text-4xl font-bold text-white">250€</p>
-                  <p className="text-white/60 text-sm">/Monat</p>
-                </div>
-                <ZahlButton
-                  productId="ecommerce"
-                  className="py-3 px-6 whitespace-nowrap"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Logo erstellen: Breite Box unter E-COM STORE */}
-        <div className="mt-6">
-          <div className="relative rounded-2xl bg-[#243d38] border border-white/10 overflow-hidden transition-all hover:border-[#5a6d6b]/30 hover:shadow-lg hover:shadow-[#5a6d6b]/5">
-            <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="flex-1">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
-                  Logo erstellen
-                </h3>
-                <p className="text-white/60 text-sm">
-                  Professionelles Logo für Ihr Unternehmen – individuell und markenprägend
-                </p>
-              </div>
-              <div className="flex items-center gap-6">
-                <p className="text-3xl md:text-4xl font-bold text-white">149€</p>
-                <ZahlButton
-                  productId="logo"
-                  className="py-3 px-6 whitespace-nowrap"
                 />
               </div>
             </div>

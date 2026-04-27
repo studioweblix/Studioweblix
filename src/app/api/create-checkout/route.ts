@@ -9,27 +9,15 @@ function getStripe() {
 
 const PRODUCTS = {
   monthly: {
-    name: 'Monatliches Paket',
-    description: 'Professionelle Website – flexibel kündbar, Hosting & Domain inklusive',
+    name: 'Restaurant-Website',
+    description: 'Website für Ihr Restaurant – Hosting & Domain inklusive',
     amount: 9900, // 99€ in Cent
     recurring: true,
   },
   once: {
-    name: 'Einmalzahlung',
-    description: 'Professionelle Website – alles inklusive, keine laufenden Kosten',
-    amount: 69900,
-    recurring: false,
-  },
-  ecommerce: {
-    name: 'E-COM STORE',
-    description: 'Professioneller Online-Shop für Ihr E-Commerce-Geschäft',
-    amount: 29900,
-    recurring: true,
-  },
-  logo: {
-    name: 'Logo erstellen',
-    description: 'Professionelles Logo für Ihr Unternehmen – individuell und markenprägend',
-    amount: 14900,
+    name: 'Website + Reservierungssoftware',
+    description: 'Professionelle Website mit Reservierungssoftware und Tisch-Management-System',
+    amount: 12900,
     recurring: false,
   },
 } as const

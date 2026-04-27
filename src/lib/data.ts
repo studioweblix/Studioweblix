@@ -84,13 +84,37 @@ export async function getPageContent(slug: string) {
     .maybeSingle()
 
   if (error) throw error
-  return data
+  if (!data) return null
+
+  const { content, ...rest } = data
+  const contentObj =
+    typeof content === 'object' && content !== null
+      ? (content as Record<string, unknown>)
+      : {}
+  return { ...rest, ...contentObj }
 }
 
 export async function getSettings() {
   const supabase = createAdminClient()
   const tenantId = getTenantId()
 
+  // store_settings-Tabelle (Dashboard speichert dort)
+  const { data: storeData } = await supabase
+    .from('store_settings')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+
+  if (storeData) {
+    const { settings: settingsJson, ...rest } = storeData
+    const settingsObj =
+      typeof settingsJson === 'object' && settingsJson !== null
+        ? (settingsJson as Record<string, unknown>)
+        : {}
+    return { ...rest, ...settingsObj }
+  }
+
+  // Fallback: settings-Tabelle (falls vorhanden)
   const { data, error } = await supabase
     .from('settings')
     .select('*')

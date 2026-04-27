@@ -1,1 +1,1 @@
-export type ProductId = 'monthly' | 'once' | 'ecommerce' | 'logo'
+export type ProductId = 'monthly' | 'once'
