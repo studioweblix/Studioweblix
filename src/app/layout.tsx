@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   },
   description:
     'Professionelle Webentwicklung, moderne Websites und digitale Lösungen für Ihr Unternehmen.',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
   openGraph: {
     type: 'website',
   },
