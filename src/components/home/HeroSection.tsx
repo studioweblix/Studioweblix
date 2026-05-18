@@ -124,12 +124,20 @@ export function HeroSection({ pageContent, settings }: HeroSectionProps) {
           <p className="text-lg sm:text-xl text-white/90 max-w-xl mb-8 animate-fade-in animate-delay-100 leading-relaxed">
             {heroSubtitle}
           </p>
-          <Link
-            href="/formular"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-white/15 backdrop-blur-md border border-white/25 text-white font-semibold hover:bg-white/25 transition-all hover:scale-[1.02] shadow-lg animate-fade-in animate-delay-200 uppercase tracking-wide"
-          >
-            Call buchen
-          </Link>
+          <div className="flex flex-wrap gap-4 animate-fade-in animate-delay-200">
+            <Link
+              href="/formular"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-white/15 backdrop-blur-md border border-white/25 text-white font-semibold hover:bg-white/25 transition-all hover:scale-[1.02] shadow-lg uppercase tracking-wide"
+            >
+              Call buchen
+            </Link>
+            <Link
+              href="/formular?skip=1"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-white/5 backdrop-blur-md border border-white/15 text-white font-semibold hover:bg-white/15 transition-all hover:scale-[1.02] shadow-lg uppercase tracking-wide"
+            >
+              Formular
+            </Link>
+          </div>
         </div>
       </div>
     </section>

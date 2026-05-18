@@ -7,7 +7,6 @@ import { submitForm } from '@/app/formular/actions'
 const STEPS = [
   'Datum & Uhrzeit wählen',
   'Unternehmensdaten',
-  'Design & Stil',
   'Texte & Medien',
   'Öffnungszeiten',
   'Social Media',
@@ -71,10 +70,11 @@ type BookedSlot = { date: string; time: string }
 
 interface FormularPageClientProps {
   initialBookedSlots?: BookedSlot[]
+  initialStep?: number
 }
 
-export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClientProps) {
-  const [step, setStep] = useState(1)
+export function FormularPageClient({ initialBookedSlots = [], initialStep = 1 }: FormularPageClientProps) {
+  const [step, setStep] = useState(initialStep)
   const [direction, setDirection] = useState(0) // 1 = forward, -1 = back
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -115,7 +115,7 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
 
   function goNext() {
     setDirection(1)
-    setStep((s) => Math.min(s + 1, 7))
+    setStep((s) => Math.min(s + 1, 6))
   }
   function goBack() {
     setDirection(-1)
@@ -240,10 +240,10 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                 />
               ))}
             </div>
-            <p className="text-white/80 text-sm text-center mt-3">Schritt {step} von 7 · {STEPS[step - 1]}</p>
+            <p className="text-white/80 text-sm text-center mt-3">Schritt {step} von 6 · {STEPS[step - 1]}</p>
           </div>
 
-          <form onSubmit={step === 7 ? handleSubmit : (e) => { e.preventDefault(); goNext(); }} className="relative overflow-hidden min-h-[320px]">
+          <form onSubmit={step === 6 ? handleSubmit : (e) => { e.preventDefault(); goNext(); }} className="relative overflow-hidden min-h-[320px]">
             <AnimatePresence mode="wait" custom={direction} initial={false}>
               <motion.div
                 key={step}
@@ -418,12 +418,8 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                   <>
                     <h2 className="text-lg font-semibold text-white">Unternehmensdaten</h2>
                     <div>
-                      <label htmlFor="companyName" className={labelClass}>Firmenname / Name</label>
-                      <input id="companyName" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputClass} placeholder="z. B. Muster GmbH" />
-                    </div>
-                    <div>
-                      <label htmlFor="companyType" className={labelClass}>Branche / Art des Unternehmens</label>
-                      <input id="companyType" type="text" value={companyType} onChange={(e) => setCompanyType(e.target.value)} className={inputClass} placeholder="z. B. Handwerk, Gastronomie" />
+                      <label htmlFor="companyName" className={labelClass}>Restaurant Name</label>
+                      <input id="companyName" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputClass} placeholder="z. B. Bella Italia" />
                     </div>
                     <div>
                       <label htmlFor="address" className={labelClass}>Adresse</label>
@@ -436,28 +432,13 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                   </>
                 )}
 
-                {/* Schritt 3: Design & Stil */}
+                {/* Schritt 3: Texte & Medien (mit Bild-Upload) */}
                 {step === 3 && (
-                  <>
-                    <h2 className="text-lg font-semibold text-white">Design & Stil</h2>
-                    <div>
-                      <label htmlFor="designStyle" className={labelClass}>Gewünschter Stil</label>
-                      <input id="designStyle" type="text" value={designStyle} onChange={(e) => setDesignStyle(e.target.value)} className={inputClass} placeholder="z. B. modern, minimalistisch, warm" />
-                    </div>
-                    <div>
-                      <label htmlFor="colorWish" className={labelClass}>Farbwünsche</label>
-                      <input id="colorWish" type="text" value={colorWish} onChange={(e) => setColorWish(e.target.value)} className={inputClass} placeholder="z. B. Blau/Weiß, Firmenfarben" />
-                    </div>
-                  </>
-                )}
-
-                {/* Schritt 4: Texte & Medien (mit Bild-Upload) */}
-                {step === 4 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Texte & Medien</h2>
                     <div>
-                      <label htmlFor="mainText" className={labelClass}>Kernbotschaft / Texte (optional hier einfügen)</label>
-                      <textarea id="mainText" value={mainText} onChange={(e) => setMainText(e.target.value)} rows={4} className={inputClass + ' resize-y'} placeholder="Wichtige Texte für Ihre Seite …" />
+                      <label htmlFor="mainText" className={labelClass}>Restaurant Konzept</label>
+                      <textarea id="mainText" value={mainText} onChange={(e) => setMainText(e.target.value)} rows={4} className={inputClass + ' resize-y'} placeholder="Beschreiben Sie Ihr Restaurant, die Küche, das Ambiente …" />
                     </div>
                     <div>
                       <label className={labelClass}>Bilder hochladen (optional)</label>
@@ -473,8 +454,8 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                   </>
                 )}
 
-                {/* Schritt 5: Öffnungszeiten */}
-                {step === 5 && (
+                {/* Schritt 4: Öffnungszeiten */}
+                {step === 4 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Öffnungszeiten</h2>
                     <p className="text-white/70 text-sm mb-4">Pro Tag angeben, wann geöffnet ist. Bei „Geschlossen“ die Zeiten ignorieren.</p>
@@ -582,8 +563,8 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                   </>
                 )}
 
-                {/* Schritt 6: Social Media */}
-                {step === 6 && (
+                {/* Schritt 5: Social Media */}
+                {step === 5 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Social Media</h2>
                     <p className="text-white/70 text-sm">Links zu Ihren Profilen (optional)</p>
@@ -602,8 +583,8 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                   </>
                 )}
 
-                {/* Schritt 7: Besondere Wünsche & Absenden */}
-                {step === 7 && (
+                {/* Schritt 6: Besondere Wünsche & Absenden */}
+                {step === 6 && (
                   <>
                     <h2 className="text-lg font-semibold text-white">Besondere Wünsche & Absenden</h2>
                     <div>
@@ -626,7 +607,7 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                   Zurück
                 </button>
               )}
-              {step === 6 && (
+              {step === 5 && (
                 <button type="button" onClick={goNext} className="px-6 py-3 rounded-lg bg-white/15 text-white font-medium hover:bg-white/25 transition-colors">
                   Überspringen
                 </button>
@@ -636,7 +617,7 @@ export function FormularPageClient({ initialBookedSlots = [] }: FormularPageClie
                 disabled={submitting}
                 className="px-6 py-3 rounded-lg bg-[#5a6d6b] text-white font-medium hover:bg-[#4A5D5B] transition-colors disabled:opacity-50 ml-auto"
               >
-                {step < 7 ? 'Weiter' : submitting ? 'Wird gesendet …' : 'Absenden'}
+                {step < 6 ? 'Weiter' : submitting ? 'Wird gesendet …' : 'Absenden'}
               </button>
             </div>
           </form>
