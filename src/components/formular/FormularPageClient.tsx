@@ -195,7 +195,7 @@ export function FormularPageClient({ initialBookedSlots = [], initialStep = 1 }:
               Vielen Dank, {ansprechpartner}!
             </h1>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Wir haben Ihre Angaben erhalten und melden uns innerhalb von 24 Stunden bei Ihnen.
+              Wir haben Ihre Angaben erhalten.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-[#2C4B44] font-medium">

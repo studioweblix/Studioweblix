@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 
 /**
- * Server-side client for public data only – no auth, no cookies.
- * Use this for getProducts, getSettings, etc. to avoid Supabase auth rate limits.
+ * Server-side admin client using the service role key – bypasses RLS.
+ * Never expose this client or its key to the browser.
  */
 export function createAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } }
   )
 }
