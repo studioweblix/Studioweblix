@@ -82,13 +82,13 @@ export function FormularPageClient({ initialBookedSlots = [], initialStep = 1 }:
 
   // Schritt 1: Unternehmensdaten
   const [companyName, setCompanyName] = useState('')
-  const [companyType, setCompanyType] = useState('')
+  const [companyType] = useState('')
   const [address, setAddress] = useState('')
   const [phone, setPhone] = useState('')
 
-  // Schritt 2: Design
-  const [designStyle, setDesignStyle] = useState('')
-  const [colorWish, setColorWish] = useState('')
+  // Schritt 2: Design (nicht mehr im Formular, Werte werden leer übergeben)
+  const [designStyle] = useState('')
+  const [colorWish] = useState('')
 
   // Schritt 3: Texte & Medien
   const [mainText, setMainText] = useState('')
